@@ -34,7 +34,7 @@ app.get("/tables", async (req, res) => {
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching tables:", e);
-    res.status(500).json({ error: "Failed to fetch tables" });
+    res.status(500).json({ error: e.message || "Unknown DB error" });
   }
 });
 
