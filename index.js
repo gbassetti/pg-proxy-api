@@ -21,13 +21,13 @@ app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 app.get("/tables", async (req, res) => {
   try {
-    const result = await pool.query(\`
+    const result = await pool.query(`
       SELECT table_name
       FROM information_schema.tables
       WHERE table_schema = $1
         AND table_type = 'BASE TABLE'
       ORDER BY table_name;
-    \`, [TARGET_SCHEMA]);
+    `, [TARGET_SCHEMA]);
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching tables:", e);
@@ -38,12 +38,12 @@ app.get("/tables", async (req, res) => {
 app.get("/table/:name/schema", async (req, res) => {
   const table = req.params.name;
   try {
-    const result = await pool.query(\`
+    const result = await pool.query(`
       SELECT column_name, data_type
       FROM information_schema.columns
       WHERE table_schema = $1
         AND table_name = $2;
-    \`, [TARGET_SCHEMA, table]);
+    `, [TARGET_SCHEMA, table]);
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching schema:", e);
@@ -54,7 +54,7 @@ app.get("/table/:name/schema", async (req, res) => {
 app.get("/table/:name/sample", async (req, res) => {
   const table = req.params.name;
   try {
-    const result = await pool.query(\`SELECT * FROM "\${TARGET_SCHEMA}"."\${table}" LIMIT 5;\`);
+    const result = await pool.query(`SELECT * FROM "\${TARGET_SCHEMA}"."\${table}" LIMIT 5;\`);
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching sample data:", e);
@@ -64,5 +64,5 @@ app.get("/table/:name/sample", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(\`🚀 API running at http://localhost:\${PORT}\`);
+  console.log(`🚀 API running at http://localhost:\${PORT}\`);
 });
