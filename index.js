@@ -17,17 +17,20 @@ const pool = new Pool({
 
 const TARGET_SCHEMA = "training_peaks";
 
+// Simple health check
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
+// List tables in the schema
 app.get("/tables", async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT table_name
-      FROM information_schema.tables
-      WHERE table_schema = $1
-        AND table_type = 'BASE TABLE'
-      ORDER BY table_name;
-    `, [TARGET_SCHEMA]);
+    const result = await pool.query(
+      `SELECT table_name
+       FROM information_schema.tables
+       WHERE table_schema = $1
+         AND table_type = 'BASE TABLE'
+       ORDER BY table_name;`,
+      [TARGET_SCHEMA]
+    );
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching tables:", e);
@@ -35,15 +38,17 @@ app.get("/tables", async (req, res) => {
   }
 });
 
+// Get schema for a given table
 app.get("/table/:name/schema", async (req, res) => {
   const table = req.params.name;
   try {
-    const result = await pool.query(`
-      SELECT column_name, data_type
-      FROM information_schema.columns
-      WHERE table_schema = $1
-        AND table_name = $2;
-    `, [TARGET_SCHEMA, table]);
+    const result = await pool.query(
+      `SELECT column_name, data_type
+       FROM information_schema.columns
+       WHERE table_schema = $1
+         AND table_name = $2;`,
+      [TARGET_SCHEMA, table]
+    );
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching schema:", e);
@@ -51,10 +56,12 @@ app.get("/table/:name/schema", async (req, res) => {
   }
 });
 
+// Get sample data from a table
 app.get("/table/:name/sample", async (req, res) => {
   const table = req.params.name;
   try {
-    const result = await pool.query(`SELECT * FROM "\${TARGET_SCHEMA}"."\${table}" LIMIT 5;\`);
+    const query = `SELECT * FROM "${TARGET_SCHEMA}"."${table}" LIMIT 5;`;
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (e) {
     console.error("Error fetching sample data:", e);
@@ -64,5 +71,5 @@ app.get("/table/:name/sample", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 API running at http://localhost:\${PORT}\`);
+  console.log(`🚀 API running at http://localhost:${PORT}`);
 });
